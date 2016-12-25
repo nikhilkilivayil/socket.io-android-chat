@@ -11,7 +11,13 @@ public class ChatApplication extends Application {
     private Socket mSocket;
     {
         try {
-            mSocket = IO.socket(Constants.CHAT_SERVER_URL);
+            IO.Options options=new IO.Options();
+//            options.hostname="http://35.164.196.224";
+//            options.port=80;
+            options.forceNew=true;
+            options.reconnection=false;
+
+            mSocket = IO.socket(Constants.CHAT_SERVER_URL,options);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

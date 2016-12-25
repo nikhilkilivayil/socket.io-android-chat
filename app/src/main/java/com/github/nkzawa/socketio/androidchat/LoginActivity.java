@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -11,6 +12,8 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import io.socket.client.Ack;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import org.json.JSONException;
@@ -57,7 +60,7 @@ public class LoginActivity extends Activity {
             }
         });
 
-        mSocket.on("login", onLogin);
+      //  mSocket.on("usernames", onLogin);
     }
 
     @Override
@@ -90,27 +93,38 @@ public class LoginActivity extends Activity {
 
         mUsername = username;
 
+        Ack ack=new Ack() {
+            @Override
+            public void call(Object... args) {
+                Log.e("Acknowldegement:",args[0]+"");
+            }
+        };
+
         // perform the user login attempt.
-        mSocket.emit("add user", username);
+        mSocket.emit("new user", username,ack);
+
     }
 
     private Emitter.Listener onLogin = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            JSONObject data = (JSONObject) args[0];
+            /*JSONObject data = (JSONObject) args[0];
 
             int numUsers;
             try {
                 numUsers = data.getInt("numUsers");
             } catch (JSONException e) {
                 return;
-            }
+            }*/
 
-            Intent intent = new Intent();
+
+            Log.e("args[0]",args+"");
+
+           /* Intent intent = new Intent();
             intent.putExtra("username", mUsername);
             intent.putExtra("numUsers", numUsers);
             setResult(RESULT_OK, intent);
-            finish();
+            finish();*/
         }
     };
 }

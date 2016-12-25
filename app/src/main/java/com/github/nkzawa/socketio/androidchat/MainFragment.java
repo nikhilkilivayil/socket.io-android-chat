@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -58,7 +59,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mAdapter = new MessageAdapter(activity, mMessages);
+       // mAdapter = new MessageAdapter(activity, mMessages);
     }
 
     @Override
@@ -73,15 +74,39 @@ public class MainFragment extends Fragment {
         mSocket.on(Socket.EVENT_DISCONNECT,onDisconnect);
         mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.on("new message", onNewMessage);
-        mSocket.on("user joined", onUserJoined);
-        mSocket.on("user left", onUserLeft);
-        mSocket.on("typing", onTyping);
-        mSocket.on("stop typing", onStopTyping);
+       // mSocket.on("new message", onNewMessage);
+        //mSocket.on("user joined", onUserJoined);
+       // mSocket.on("user left", onUserLeft);
+       // mSocket.on("typing", onTyping);
+        //mSocket.on("stop typing", onStopTyping);
+        mSocket.on("load old messages",onLogin);
         mSocket.connect();
 
         startSignIn();
     }
+
+    private Emitter.Listener onLogin = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            /*JSONObject data = (JSONObject) args[0];
+
+            int numUsers;
+            try {
+                numUsers = data.getInt("numUsers");
+            } catch (JSONException e) {
+                return;
+            }*/
+
+
+            Log.e("args[0]",args.length+"");
+
+           /* Intent intent = new Intent();
+            intent.putExtra("username", mUsername);
+            intent.putExtra("numUsers", numUsers);
+            setResult(RESULT_OK, intent);
+            finish();*/
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
