@@ -192,10 +192,10 @@ public class MainFragment extends Fragment {
         }
 
         mUsername = data.getStringExtra("username");
-        int numUsers = data.getIntExtra("numUsers", 1);
+        //int numUsers = data.getIntExtra("numUsers", 1);
 
-        addLog(getResources().getString(R.string.message_welcome));
-        addParticipantsLog(numUsers);
+       // addLog(getResources().getString(R.string.message_welcome));
+      //  addParticipantsLog(numUsers);
     }
 
     @Override

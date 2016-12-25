@@ -66,8 +66,7 @@ public class LoginActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        mSocket.off("login", onLogin);
+       // mSocket.off("login", onLogin);
     }
 
     /**
@@ -97,6 +96,15 @@ public class LoginActivity extends Activity {
             @Override
             public void call(Object... args) {
                 Log.e("Acknowldegement:",args[0]+"");
+                boolean b=(boolean)args[0];
+                if(b){
+                    Intent intent = new Intent();
+                    intent.putExtra("username", mUsername);
+                    // intent.putExtra("numUsers", numUsers);
+                    setResult(RESULT_OK, intent);
+                    finish();
+                }
+
             }
         };
 
@@ -118,13 +126,16 @@ public class LoginActivity extends Activity {
             }*/
 
 
-            Log.e("args[0]",args+"");
-
-           /* Intent intent = new Intent();
+            //Log.e("args[0]",args+"");
+            boolean b=(boolean)args[0];
+            if(b){
+                Intent intent = new Intent();
             intent.putExtra("username", mUsername);
-            intent.putExtra("numUsers", numUsers);
+           // intent.putExtra("numUsers", numUsers);
             setResult(RESULT_OK, intent);
-            finish();*/
+            finish();
+            }
+
         }
     };
 }
