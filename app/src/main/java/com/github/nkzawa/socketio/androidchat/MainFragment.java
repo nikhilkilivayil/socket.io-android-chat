@@ -23,8 +23,12 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import io.socket.client.Ack;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -59,7 +63,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-       // mAdapter = new MessageAdapter(activity, mMessages);
+        mAdapter = new MessageAdapter(activity, mMessages);
     }
 
     @Override
@@ -74,7 +78,7 @@ public class MainFragment extends Fragment {
         mSocket.on(Socket.EVENT_DISCONNECT,onDisconnect);
         mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-       // mSocket.on("new message", onNewMessage);
+        mSocket.on("new message", onNewMessage);
         //mSocket.on("user joined", onUserJoined);
        // mSocket.on("user left", onUserLeft);
        // mSocket.on("typing", onTyping);
@@ -88,23 +92,23 @@ public class MainFragment extends Fragment {
     private Emitter.Listener onLogin = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            /*JSONObject data = (JSONObject) args[0];
+            JSONArray data = (JSONArray) args[0];
 
-            int numUsers;
-            try {
-                numUsers = data.getInt("numUsers");
-            } catch (JSONException e) {
-                return;
-            }*/
+            for(int i=0;i<data.length();i++){
+                try {
+                    JSONObject obj=data.getJSONObject(i);
+                    String nick=obj.getString("nick");
+                    String message=obj.getString("msg");
+                    Log.e("Nickname:",nick);
+                    Log.e("Message:",message);
+                    addMessage(nick,message);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
 
 
-            Log.e("args[0]",args.length+"");
 
-           /* Intent intent = new Intent();
-            intent.putExtra("username", mUsername);
-            intent.putExtra("numUsers", numUsers);
-            setResult(RESULT_OK, intent);
-            finish();*/
         }
     };
 
@@ -125,10 +129,11 @@ public class MainFragment extends Fragment {
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         mSocket.off("new message", onNewMessage);
-        mSocket.off("user joined", onUserJoined);
+        mSocket.off("load old messages",onLogin);
+      /*  mSocket.off("user joined", onUserJoined);
         mSocket.off("user left", onUserLeft);
         mSocket.off("typing", onTyping);
-        mSocket.off("stop typing", onStopTyping);
+        mSocket.off("stop typing", onStopTyping);*/
     }
 
     @Override
@@ -140,39 +145,10 @@ public class MainFragment extends Fragment {
         mMessagesView.setAdapter(mAdapter);
 
         mInputMessageView = (EditText) view.findViewById(R.id.message_input);
-        mInputMessageView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int id, KeyEvent event) {
-                if (id == R.id.send || id == EditorInfo.IME_NULL) {
-                    attemptSend();
-                    return true;
-                }
-                return false;
-            }
-        });
-        mInputMessageView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (null == mUsername) return;
-                if (!mSocket.connected()) return;
 
-                if (!mTyping) {
-                    mTyping = true;
-                    mSocket.emit("typing");
-                }
 
-                mTypingHandler.removeCallbacks(onTypingTimeout);
-                mTypingHandler.postDelayed(onTypingTimeout, TYPING_TIMER_LENGTH);
-            }
 
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
 
         ImageButton sendButton = (ImageButton) view.findViewById(R.id.send_button);
         sendButton.setOnClickListener(new View.OnClickListener() {
@@ -268,10 +244,16 @@ public class MainFragment extends Fragment {
         }
 
         mInputMessageView.setText("");
-        addMessage(mUsername, message);
+       // addMessage(mUsername, message);
+        Ack sendAck=new Ack() {
+            @Override
+            public void call(Object... args) {
+                Log.e("Send result:",args[0]+"");
+            }
+        };
 
         // perform the sending message attempt.
-        mSocket.emit("new message", message);
+        mSocket.emit("send message", message,sendAck);
     }
 
     private void startSignIn() {
@@ -346,13 +328,13 @@ public class MainFragment extends Fragment {
                     String username;
                     String message;
                     try {
-                        username = data.getString("username");
-                        message = data.getString("message");
+                        username = data.getString("nick");
+                        message = data.getString("msg");
                     } catch (JSONException e) {
                         return;
                     }
 
-                    removeTyping(username);
+                   // removeTyping(username);
                     addMessage(username, message);
                 }
             });
